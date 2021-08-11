@@ -6,15 +6,6 @@ include("user_vars.jl")
 # Regex for finding participant ID
 ID_regex = r"(?<=\s)[0-9]{1,2}(?=_)"
 
-
-driver_cols =  ["Elapsed_time_s", "Dist_travelled_ft", "Longit_velocity_mph",
-"Longit_velocity_fps", "Lat_velocity_fps", "Lane_position_ft",
-"Steering_raw_counts", "Throttle_raw_counts", "Brake_raw_counts",
-"Traffic_light_settings", "Collisions"]
-
-other_vehicle_cols = ["Row_number", "Elapsed_time_s", "Vehicle_ID", "Speed_diff_fps",
-"Longit_pos_from_driver", "Lat_pos_from_Driver"]
-
 driver_data_cols = 1:11; 
 other_data_start = maximum(driver_data_cols) + 1
 
