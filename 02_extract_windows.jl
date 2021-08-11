@@ -24,6 +24,7 @@ output_path = joinpath(output_dir, out_filename)
 
 # Start off with empty dataframe
 output_df = DataFrame(Matrix{Float64}(undef, 0, length(driver_cols)), Symbol.(driver_cols))
+output_df.Rel_time_s = Vector{Float64}()
 output_df.Participant_ID = Vector{Int64}()
 
 for filepath in driver_files
@@ -53,7 +54,8 @@ for filepath in driver_files
     window_idx = (window_start .<= driver_df.Elapsed_time_s .<= window_end)
     windowed_df = driver_df[window_idx, :]
 
-    # Add participant ID to dataframe
+    # Add participant ID and Relative times to dataframe
+    insertcols!(windowed_df, :Rel_time => :Elapsed_time_s .- crossover_time)
     insertcols!(windowed_df, :Participant_ID => participantInt)
 
     # Append for output
