@@ -55,7 +55,7 @@ for filepath in driver_files
     windowed_df = driver_df[window_idx, :]
 
     # Add participant ID and Relative times to dataframe
-    insertcols!(windowed_df, :Rel_time => :Elapsed_time_s .- crossover_time)
+    windowed_df.Rel_time_s = windowed_df.Elapsed_time_s .- crossover_time 
     insertcols!(windowed_df, :Participant_ID => participantInt)
 
     # Append for output
