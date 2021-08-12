@@ -1,6 +1,13 @@
-using ImageFiltering
+using ImageFiltering, CSV, DataFrames, Plots
 using ShiftedArrays: lag, lead
 
+filepath = "data/windowed_data/Vehicle11_10sB_1sA.csv"
+
+allps_windowed_df = CSV.read(filepath, DataFrame)
+
+P_id = 11
+
+windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :]
 
 est_accel = first_order_FD(windowed_df);
 est_jerk = second_order_FD(windowed_df);
