@@ -7,11 +7,6 @@ nonvehicle_target = Dict(
     "sample_rate" => 30,
  )
 
- window_properties = Dict(
-    "time_range_s" => [-10,1],
-    "distance_range_ft" => [],
- )  
-
  directories = Dict(
      "raw_data" => "data/raw_data/",
      "extracted_driver" => "data/extracted_data/driver_data/",
