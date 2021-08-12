@@ -1,0 +1,41 @@
+# Window definitions
+
+# Relative windows need an event to calculate the window relative to:
+#   vehicle_id:     ID of an onther vehicle contained in other_vehicle_data
+#   event_location: Absolute location of an event or object (in ft)
+#   event_time:     Absolute time of an event
+
+# Window lengths can be defined by:
+#   time_range_s:   A time range in seconds
+#   dist_range_ft:  A distance range in ft
+# A single value will be treated as a symetrical window around the event
+# Two values will be treated as the start and end points of the window relative to the event 
+# In the latter case, a Negative value indicates pre-event distance/time,
+# and a positive event indicates post-event distance/time.
+
+# If no event is given then the window is treated as absolute, and two positive values
+# (representing absolute start/stop distance/time) are expected.
+
+[chicane_time_before]
+vehicle_id = 11
+time_range_s = [-10, 1]
+output_name = "Vehicle11_10sB_1sA.csv"
+
+[chicane_time_after]
+vehicle_id = 11
+time_range_s = [-1, 10]
+output_name = "Vehicle11_1sB_10sA.csv"
+
+[chicane_dist_before]
+vehicle_id = 11
+dist_range_ft = [-300, 50]
+output_name = "Vehicle11_300ftB_50ftA.csv"
+
+[slow_car]
+vehicle_id = 2
+time_range_s = [-10, 10]
+output_name = "Vehicle2_10sB_10sA.csv"
+
+[sign_response]
+dist_range_ft = [13950, 15000]
+output_name = "50to30Signs.csv" 

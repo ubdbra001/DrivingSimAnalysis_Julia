@@ -1,19 +1,22 @@
 # Extract data around crossover point for each window of interest
 
-using Glob, CSV, DataFrames #ImageFiltering
+using Glob, CSV, DataFrames, TOML
 
 include("user_vars.jl")
+
+all_windows = open("window_details.toml") do file
+    TOML.parse(file)
+end
 
 ID_regex = r"(?<=p)[0-9]{3}(?=_)"
 
 driver_files = glob("*.csv", directories["extracted_driver"])
 
 # Start with simple example of car chicane
-vehicle_n = 11
+window_detail = all_windows["chicane_time_before"]
 
-out_filename = "Vehicle11_10sB_1sA.csv"
 output_dir = "data/windowed_data/"
-output_path = joinpath(output_dir, out_filename)
+output_path = joinpath(output_dir, window_detail["output_name"])
 
 
 # Still need to work out how crossover is determined
@@ -40,7 +43,7 @@ for filepath in driver_files
     other_df = CSV.read(other_vehicle_path, DataFrame)
     
     # Filter by vehicle ID
-    filtered_other_df = other_df[other_df.Vehicle_ID .== vehicle_n, :]
+    filtered_other_df = other_df[other_df.Vehicle_ID .== window_detail["vehicle_id"], :]
 
     # Find first point where long_dist from driver < 0
     # (Sign of operator may have to switch depending on event: Some start behind, others start in-front)
@@ -50,7 +53,7 @@ for filepath in driver_files
     crossover_time = filtered_other_df.Elapsed_time_s[crossover_idx]
 
     # Once crossover point is found then pull out the data for the window around the point
-    window_start, window_end = window_properties["time_range_s"] .+ crossover_time
+    window_start, window_end = window_detail["time_range_s"] .+ crossover_time
     window_idx = (window_start .<= driver_df.Elapsed_time_s .<= window_end)
     windowed_df = driver_df[window_idx, :]
 
