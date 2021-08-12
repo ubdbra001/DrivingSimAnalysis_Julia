@@ -1,21 +1,21 @@
 using ImageFiltering, CSV, DataFrames, Plots
 using ShiftedArrays: lag, lead
 
-filepath = "data/windowed_data/Vehicle11_10sB_1sA.csv"
+filepath = "data/windowed_data/Vehicle2_10sB_1sA.csv"
 
 allps_windowed_df = CSV.read(filepath, DataFrame)
 
-P_id = 11
+P_id = 54
 
-windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :]
+windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
 
 est_accel = first_order_FD(windowed_df);
 est_jerk = second_order_FD(windowed_df);
 
 # This is all acceleration proccessing stuff 
-gauss_ker = ImageFiltering.Kernel.gaussian((2,))
-filt_accel = [missing; imfilter(est_accel[2:end-1], gauss_ker); missing]
-filt_jerk = [missing; imfilter(est_jerk[2:end-1], gauss_ker); missing]
+gauss_ker = ImageFiltering.Kernel.gaussian((2,));
+filt_accel = [missing; imfilter(est_accel[2:end-1], gauss_ker); missing];
+filt_jerk = [missing; imfilter(est_jerk[2:end-1], gauss_ker); missing];
 
 #b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
 
