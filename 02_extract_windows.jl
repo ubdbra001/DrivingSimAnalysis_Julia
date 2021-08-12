@@ -38,25 +38,58 @@ for filepath in driver_files
     # Load driver_data
     driver_df = CSV.read(filepath, DataFrame)
     
-    # For now just go for using other vehicle data
-    other_vehicle_path = gen_output_path("extracted_other", participantID)
-    other_df = CSV.read(other_vehicle_path, DataFrame)
+    if "vehicle_id" in keys(window_detail)
+        # For now just go for using other vehicle data
+        other_vehicle_path = gen_output_path("extracted_other", participantID)
+        other_df = CSV.read(other_vehicle_path, DataFrame)
+        
+        # Filter by vehicle ID
+        filtered_other_df = other_df[other_df.Vehicle_ID .== window_detail["vehicle_id"], :]
     
-    # Filter by vehicle ID
-    filtered_other_df = other_df[other_df.Vehicle_ID .== window_detail["vehicle_id"], :]
+        # Find first point where long_dist from driver < 0
+        # (Sign of operator may have to switch depending on event: Some start behind, others start in-front)
+        crossover_idx = findfirst(filtered_other_df.Longit_pos_from_driver .< 0)
+    
+        # Find time of crossover
+        crossover_time = filtered_other_df.Elapsed_time_s[crossover_idx]
+    elseif "event_distance" in keys(window_detail)
 
-    # Find first point where long_dist from driver < 0
-    # (Sign of operator may have to switch depending on event: Some start behind, others start in-front)
-    crossover_idx = findfirst(filtered_other_df.Longit_pos_from_driver .< 0)
+        # Find index of first sample where driver passed event distance 
+        crossover_idx = findfirst(driver_df.Dist_travelled_ft .> window_detail["event_distance"])
+        crossover_dist = driver_df.Dist_travelled_ft[crossover_idx]
 
-    # Find time of crossover
-    crossover_time = filtered_other_df.Elapsed_time_s[crossover_idx]
+    elseif "event_time" in keys(window_detail)
+    
+    end
+    
+    
+    if "time_range_s" in keys(window_detail)
+        
+        if length(window_detail["time_range_s"]) == 1
+            win_range = [-window_detail["time_range_s"], window_detail["time_range_s"]]
+        elseif length(window_detail["time_range_s"]) == 2
+            win_range = window_detail["time_range_s"]
+        end
 
-    # Once crossover point is found then pull out the data for the window around the point
-    window_start, window_end = window_detail["time_range_s"] .+ crossover_time
-    window_idx = (window_start .<= driver_df.Elapsed_time_s .<= window_end)
+        # Once crossover point is found then pull out the data for the window around the point
+        window_start, window_end = win_range .+ crossover_time
+        window_idx = (window_start .<= driver_df.Elapsed_time_s .<= window_end)
+
+    elseif "dist_range_ft" in keys(window_detail)
+
+        if length(window_detail["dist_range_ft"]) == 1
+            win_range = [-window_detail["dist_range_ft"], window_detail["dist_range_ft"]]
+        elseif length(window_detail["dist_range_ft"]) == 2
+            win_range = window_detail["dist_range_ft"]
+        end
+
+        # Once crossover point is found then pull out the data for the window around the point
+        window_start, window_end = win_range .+ crossover_dist
+        window_idx = (window_start .<= driver_df.Dist_travelled_ft .<= window_end)
+    end
+    
     windowed_df = driver_df[window_idx, :]
-
+    
     # Add participant ID and Relative times to dataframe
     windowed_df.Rel_time_s = windowed_df.Elapsed_time_s .- crossover_time 
     insertcols!(windowed_df, :Participant_ID => participantInt)
