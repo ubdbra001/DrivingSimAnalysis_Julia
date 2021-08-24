@@ -1,4 +1,4 @@
-function generate_window(crossing_idx::Int, col_of_interest, window_range)
+function generate_window(crossing_idx::Vector{Int}, col_of_interest, window_range)
 
     # Function for generating window indexes for relative time
     # If window_range is a single value then make a symetric window

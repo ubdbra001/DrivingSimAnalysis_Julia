@@ -4,17 +4,19 @@ using Glob, CSV, DataFrames, TOML
 
 include("user_vars.jl")
 include("functions/extract_windows_utils.jl")
+include("functions/data_extract_utils.jl")
 
 all_windows = open("window_details.toml") do file
     TOML.parse(file)
 end
+
+window_detail = all_windows["sign_response"]
 
 ID_regex = r"(?<=p)[0-9]{3}(?=_)"
 
 driver_files = glob("*.csv", directories["extracted_driver"])
 
 # Start with simple example of car chicane
-window_detail = all_windows["chicane_time_after"]
 
 output_dir = "data/windowed_data/"
 output_path = joinpath(output_dir, window_detail["output_name"])
@@ -28,8 +30,10 @@ output_path = joinpath(output_dir, window_detail["output_name"])
 
 # Start off with empty dataframe
 output_df = DataFrame(Matrix{Float64}(undef, 0, length(driver_cols)), Symbol.(driver_cols))
-output_df.Rel_time_s = Vector{Float64}()
 output_df.Participant_ID = Vector{Int64}()
+
+output_df.Rel_time_s = Vector{Float64}()
+output_df.Rel_dist_ft = Vector{Float64}()
 
 for filepath in driver_files
     filename = basename(filepath)
@@ -38,7 +42,7 @@ for filepath in driver_files
     
     # Load driver_data
     driver_df = CSV.read(filepath, DataFrame)
-    crossing_idx = nothing
+    crossover_idx = nothing
 
     if "vehicle_id" in keys(window_detail)
         # For now just go for using other vehicle data
@@ -87,6 +91,9 @@ for filepath in driver_files
     if !isnothing(crossover_idx)
         windowed_df.Rel_time_s = windowed_df.Elapsed_time_s .- driver_df.Elapsed_time_s[crossover_idx]
         windowed_df.Rel_dist_ft = windowed_df.Dist_travelled_ft .- driver_df.Dist_travelled_ft[crossover_idx]
+    else
+        windowed_df.Rel_time_s = windowed_df.Elapsed_time_s .- windowed_df.Elapsed_time_s[1] 
+        windowed_df.Rel_dist_ft = windowed_df.Dist_travelled_ft .- windowed_df.Dist_travelled_ft[1]
     end
     insertcols!(windowed_df, :Participant_ID => participantInt)
 
