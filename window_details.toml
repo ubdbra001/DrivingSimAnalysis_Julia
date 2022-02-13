@@ -2,7 +2,7 @@
 
 # Relative windows need an event to calculate the window relative to:
 #   vehicle_id:     ID of an onther vehicle contained in other_vehicle_data
-#   event_location: Absolute location of an event or object (in ft)
+#   event_distance: Absolute location of an event or object (in ft)
 #   event_time:     Absolute time of an event
 
 # Window lengths can be defined by:
@@ -21,21 +21,41 @@ vehicle_id = 11
 time_range_s = [-10, 1]
 output_name = "Vehicle11_10sB_1sA.csv"
 
-[chicane_time_after]
-vehicle_id = 11
-time_range_s = [-1, 10]
-output_name = "Vehicle11_1sB_10sA.csv"
+#[chicane_time_after]
+#vehicle_id = 11
+#time_range_s = [-1, 10]
+#output_name = "Vehicle11_1sB_10sA.csv"
+#
+#[chicane_dist_before]
+#vehicle_id = 11
+#dist_range_ft = [-300, 50]
+#output_name = "Vehicle11_300ftB_50ftA.csv"
+#
+#[chicane_dist_after]
+#vehicle_id = 11
+#dist_range_ft = [-50, 500]
+#output_name = "Vehicle11_50ftB_500ftA.csv"
+#
+#[slow_car]
+#vehicle_id = 2
+#time_range_s = [-30, 10]
+#output_name = "Vehicle2_30sB_10sA.csv"
+#
+#[sign_response]
+#dist_range_ft = [13950, 15000]
+#output_name = "50to30Signs.csv" 
+#
+[roadworks_before]
+dist_range_ft = [-200, -50]
+event_distance = 6500
+output_name = "roadworks_200ftB_50ftB.csv"
 
-[chicane_dist_before]
-vehicle_id = 11
-dist_range_ft = [-300, 50]
-output_name = "Vehicle11_300ftB_50ftA.csv"
+[roadworks_during]
+dist_range_ft = [-50, 50]
+event_distance = 6500
+output_name = "roadworks_50ftB_50ftA.csv"
 
-[slow_car]
-vehicle_id = 2
-time_range_s = 30
-output_name = "Vehicle2_30sB_30sA.csv"
-
-[sign_response]
-dist_range_ft = [13950, 15000]
-output_name = "50to30Signs.csv" 
+[roadworks_after]
+dist_range_ft = [50, 200]
+event_distance = 6500
+output_name = "roadworks_50ftA_200ftA.csv"
