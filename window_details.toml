@@ -16,35 +16,35 @@
 # If no event is given then the window is treated as absolute, and two positive values
 # (representing absolute start/stop distance/time) are expected.
 
-[chicane_time_before]
-vehicle_id = 11
-time_range_s = [-10, 1]
-output_name = "Vehicle11_10sB_1sA.csv"
+#[chicane_time_before]
+#vehicle_id = 11
+#time_range_s = [-10, 1]
+#output_name = "Vehicle11_10sB_1sA.csv"
 
 #[chicane_time_after]
 #vehicle_id = 11
 #time_range_s = [-1, 10]
 #output_name = "Vehicle11_1sB_10sA.csv"
 #
-#[chicane_dist_before]
-#vehicle_id = 11
-#dist_range_ft = [-300, 50]
-#output_name = "Vehicle11_300ftB_50ftA.csv"
-#
-#[chicane_dist_after]
-#vehicle_id = 11
-#dist_range_ft = [-50, 500]
-#output_name = "Vehicle11_50ftB_500ftA.csv"
-#
+[chicane_dist_before]
+vehicle_id = 11
+dist_range_ft = [-300, 50]
+output_name = "Vehicle11_300ftB_50ftA.csv"
+
+[chicane_dist_after]
+vehicle_id = 11
+dist_range_ft = [-50, 500]
+output_name = "Vehicle11_50ftB_500ftA.csv"
+
 #[slow_car]
 #vehicle_id = 2
 #time_range_s = [-30, 10]
 #output_name = "Vehicle2_30sB_10sA.csv"
-#
-#[sign_response]
-#dist_range_ft = [13950, 15000]
-#output_name = "50to30Signs.csv" 
-#
+
+[sign_response]
+dist_range_ft = [13950, 15000]
+output_name = "50to30Signs.csv" 
+
 [roadworks_before]
 dist_range_ft = [-200, -50]
 event_distance = 6500
