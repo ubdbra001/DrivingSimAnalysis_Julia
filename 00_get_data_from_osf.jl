@@ -5,7 +5,7 @@ retain_zip = true
 # URL for data from OSF
 url = "https://files.de-1.osf.io/v1/resources/frv29/providers/osfstorage/5fd8d12c0694b703e2f36c69/?zip="
 temp_path = "data/Download.zip"
-out_path = "data/raw_data2/"
+out_path = "data/raw_data/"
 
 # Open IOStream and stream download into file
 open(temp_path, "w") do f
