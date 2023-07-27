@@ -64,14 +64,14 @@ function read_ds_data(filename)
 
 end
 
-function extract_othervehicles_data(data_in)
+function extract_othervehicles_data(data_in, driver_data)
 
     n_other_vehicles = maximum(Int.(skipmissing(data_in[:,1])))
 
     v_0 = Array{Number}(undef, 0, 6)
 
     for vehicle_ID in 1:n_other_vehicles
-        v_temp = extract_vehic_data(data_in, vehicle_ID)
+        v_temp = extract_vehic_data(data_in, driver_data, vehicle_ID)
         v_0 = cat(v_0, v_temp, dims = 1) 
     end
 
@@ -80,7 +80,7 @@ function extract_othervehicles_data(data_in)
 end
 
 
-function extract_vehic_data(other_vehicle_data, ID_to_find)
+function extract_vehic_data(other_vehicle_data, driver_only_data, ID_to_find)
 
     # Replace missing vales with 0s (Do we still need this?)
     replace!(other_vehicle_data, missing => 0.0)

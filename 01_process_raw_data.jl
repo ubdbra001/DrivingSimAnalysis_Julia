@@ -37,7 +37,7 @@ for filepath in files
     # If the other vehicle data hasn't been extracted and saved then do that 
     if !isfile(otherveh_path)
         other_vehicle_raw = raw_data[2:end-1, other_data_start:end]
-        other_vehicle_data = extract_othervehicles_data(other_vehicle_raw)
+        other_vehicle_data = extract_othervehicles_data(other_vehicle_raw, driver_only_data)
         other_vehicle_df = DataFrame(other_vehicle_data, Symbol.(other_vehicle_cols))
         CSV.write(otherveh_path, other_vehicle_df)
     end
