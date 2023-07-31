@@ -1,6 +1,8 @@
 using Dierckx, CSV, DataFrames, Plots, TOML, Statistics
 using Plots.PlotMeasures: px
 
+include("functions/general_utils.jl")
+
 all_windows = open("window_details.toml") do file
     TOML.parse(file)
 end
@@ -18,9 +20,9 @@ plot_path = "output/plots/$(window_name)"
 
 plot_type = "svg"
 
-if !isdir(plot_path)
-    mkdir(plot_path)
-end
+
+
+
 
 allps_windowed_df = CSV.read(file_path, DataFrame);
 # Add acceleration & jerk columns
@@ -29,6 +31,7 @@ insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0
 participants = unique(allps_windowed_df.Participant_ID)
 
     plot_path = joinpath("output/plots/", "$(window_name)", "s$(smoothing)")
+    check_and_create_dir(plot_path)
 
     for P_id in participants
 
