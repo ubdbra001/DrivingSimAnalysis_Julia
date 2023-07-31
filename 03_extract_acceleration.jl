@@ -4,6 +4,7 @@ using Plots.PlotMeasures: px
 all_windows = open("window_details.toml") do file
     TOML.parse(file)
 end
+include_commparison = true;
 
 window_name = "chicane_dist_after"
 
@@ -41,19 +42,12 @@ windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
 
 x_var = windowed_df.Rel_dist_ft;
 
+        if include_commparison
 no_smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = base_smoothing);
 
 est_accel_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 1);
 est_jerk_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 2);
-
-
-
-
-smoothing = 1
-s_title = "1"
-
-out_name = "$(window_name)_P$(padded_ID)_s$(s_title).$(plot_type)"
-outpath = joinpath(plot_path, out_name)
+        end
 
 smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = smoothing);
 
@@ -65,34 +59,45 @@ est_jerk_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 2);
 #allps_windowed_df.Longit_jerk_fps3[allps_windowed_df.Participant_ID .== P_id] .= est_jerk;
 #b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
 
+        if include_commparison
+            p1_vars = [windowed_df.Longit_velocity_fps, no_smooth(windowed_df.Elapsed_time_s)];
+            p2_vars = [est_accel_s, est_accel_ns];
+            p3_vars = [est_jerk_s, est_jerk_ns];
+            alpha_vals = [1 0.3];
+        else
+            p1_vars = windowed_df.Longit_velocity_fps;
+            p2_vars = est_accel_s;
+            p3_vars = est_jerk_s;
+            alpha_vals = 1;
+        end
+
 p1 = plot(
     x_var,
-    [windowed_df.Longit_velocity_fps, no_smooth(windowed_df.Elapsed_time_s)],
+            p1_vars,
     ylabel = "Velocity (ft/s)",
     label = missing,
     ylims = (0, 100),
-    la = [1 0.5]
+            la = alpha_vals
 );
 
 p2 = plot(
     x_var,
-    [est_accel_s, est_accel_ns],
+            p2_vars,
     colour = "red", 
     ylabel = "Acceleration (ft/s²)",
     label = missing,
     ylims = (-15, 15),
-    la = [1 0.5]
+            la = alpha_vals
 );
-
 
 p3 = plot(
     x_var,
-    [est_jerk_s, est_jerk_ns], 
+            p3_vars, 
     colour = "green",
     ylabel = "Jerk (ft/s³)",
     label = missing,
     ylims = (-100, 100),
-    la = [1 0.5]
+            la = alpha_vals
 );
     
 plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 600), left_margin = 20px);
