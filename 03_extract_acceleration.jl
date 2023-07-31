@@ -100,11 +100,21 @@ plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 
 savefig(plot_out, outpath)
 #end
 
-CSV.write(file_path, allps_windowed_df)
+    #CSV.write(file_path, allps_windowed_df)
 
-test = groupby(allps_windowed_df, :Participant_ID)
+    grouped_data = groupby(allps_windowed_df, :Participant_ID)
 
-test_summary = combine(test, :Longit_velocity_fps => mean => :Mean_Velocity_fps,
+    summarised_data = combine(grouped_data,
+        :Longit_velocity_fps => mean => :Mean_Velocity_fps,
+        :Longit_velocity_fps => std => :SD_Velocity_fps,
                              :Longit_accel_fps2 => mean => :Mean_Accel_fps2,
-                             :Longit_jerk_fps3 => mean => :Mean_Jerk_fps3)
+        :Longit_accel_fps2 => median => :Median_Accel_fps2,
+        :Longit_accel_fps2 => std => :SD_Accel_fps2,
+        :Longit_jerk_fps3 => mean => :Mean_Jerk_fps3,
+        :Longit_jerk_fps3 => (x -> maximum(abs.(x))) => :MaxAbs_Jerk_fps3,
+        :Longit_jerk_fps3 => std => :SD_Jerk_fps3)
 # Summarise dataframe and save original (with new cols) and summarised version
+
+    check_and_create_dir(dirname(summ_path))
+
+    CSV.write(summ_path, summarised_data)
