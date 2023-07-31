@@ -14,15 +14,14 @@ window_name = "chicane_dist_after"
 
 window_detail = all_windows[window_name]
 
-file_path = joinpath("data/windowed_data/", window_detail["output_name"])
 
-plot_path = "output/plots/$(window_name)"
 
 plot_type = "svg"
 
 
 
 
+    file_path = joinpath("data/windowed_data/", window_detail["output_name"])
 
 allps_windowed_df = CSV.read(file_path, DataFrame);
 # Add acceleration & jerk columns
