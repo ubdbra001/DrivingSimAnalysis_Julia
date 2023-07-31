@@ -6,19 +6,13 @@ include("functions/general_utils.jl")
 all_windows = open("window_details.toml") do file
     TOML.parse(file)
 end
+
 include_commparison = true;
+
 base_smoothing = 0
 smoothing = 0.01
 
-
-
-
-
 plot_type = "svg"
-
-
-
-
 
 for (window_name, window_detail) in all_windows
 
@@ -27,6 +21,7 @@ for (window_name, window_detail) in all_windows
     file_path = joinpath("data/windowed_data/", window_detail["output_name"])
 
     allps_windowed_df = CSV.read(file_path, DataFrame);
+
     # Add acceleration & jerk columns
     insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0.0)
 
@@ -47,14 +42,7 @@ for (window_name, window_detail) in all_windows
         windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
 
         x_var = windowed_df.Rel_dist_ft;
-        
-        if include_commparison
-            no_smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = base_smoothing);
 
-            est_accel_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 1);
-            est_jerk_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 2);
-        end
-        
         smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = smoothing);
 
         est_accel_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 1);
@@ -63,9 +51,12 @@ for (window_name, window_detail) in all_windows
         # Add estimated 1st and 2nd derivatives to dataframe
         allps_windowed_df.Longit_accel_fps2[allps_windowed_df.Participant_ID .== P_id] .= est_accel_s;
         allps_windowed_df.Longit_jerk_fps3[allps_windowed_df.Participant_ID .== P_id] .= est_jerk_s;
-        #b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
 
         if include_commparison
+            no_smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = base_smoothing);
+            est_accel_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 1);
+            est_jerk_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 2);
+
             p1_vars = [windowed_df.Longit_velocity_fps, no_smooth(windowed_df.Elapsed_time_s)];
             p2_vars = [est_accel_s, est_accel_ns];
             p3_vars = [est_jerk_s, est_jerk_ns];
@@ -111,8 +102,6 @@ for (window_name, window_detail) in all_windows
         savefig(plot_out, out_path);
     end
 
-    #CSV.write(file_path, allps_windowed_df)
-
     grouped_data = groupby(allps_windowed_df, :Participant_ID)
 
     summarised_data = combine(grouped_data,
@@ -124,7 +113,6 @@ for (window_name, window_detail) in all_windows
         :Longit_jerk_fps3 => mean => :Mean_Jerk_fps3,
         :Longit_jerk_fps3 => (x -> maximum(abs.(x))) => :MaxAbs_Jerk_fps3,
         :Longit_jerk_fps3 => std => :SD_Jerk_fps3)
-    # Summarise dataframe and save original (with new cols) and summarised version
 
     check_and_create_dir(dirname(summ_path))
 
