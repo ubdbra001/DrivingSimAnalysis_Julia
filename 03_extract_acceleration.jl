@@ -5,6 +5,8 @@ all_windows = open("window_details.toml") do file
     TOML.parse(file)
 end
 include_commparison = true;
+base_smoothing = 0
+smoothing = 0.01
 
 window_name = "chicane_dist_after"
 
@@ -26,18 +28,16 @@ insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0
 
 participants = unique(allps_windowed_df.Participant_ID)
 
-base_smoothing = 0
+    plot_path = joinpath("output/plots/", "$(window_name)", "s$(smoothing)")
 
-
-
-P_id = 57
-
-#for P_id in participants
+    for P_id in participants
 
 padded_ID = lpad(P_id, 3, "0")
 
-println("current participant: ", out_name, "\n")
+        println("current participant: ", padded_ID, "\n")
 
+        out_name = "$(window_name)_P$(padded_ID)_s$(smoothing).$(plot_type)";
+        out_path = joinpath(plot_path, out_name);
 windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
 
 x_var = windowed_df.Rel_dist_ft;
@@ -102,8 +102,8 @@ p3 = plot(
     
 plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 600), left_margin = 20px);
    
-savefig(plot_out, outpath)
-#end
+        savefig(plot_out, out_path);
+    end
 
     #CSV.write(file_path, allps_windowed_df)
 
