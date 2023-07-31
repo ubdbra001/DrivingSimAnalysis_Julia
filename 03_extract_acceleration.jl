@@ -55,8 +55,8 @@ est_accel_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 1);
 est_jerk_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 2);
     
 # Add estimated 1st and 2nd derivatives to dataframe
-#allps_windowed_df.Longit_accel_fps2[allps_windowed_df.Participant_ID .== P_id] .= est_accel;
-#allps_windowed_df.Longit_jerk_fps3[allps_windowed_df.Participant_ID .== P_id] .= est_jerk;
+        allps_windowed_df.Longit_accel_fps2[allps_windowed_df.Participant_ID .== P_id] .= est_accel_s;
+        allps_windowed_df.Longit_jerk_fps3[allps_windowed_df.Participant_ID .== P_id] .= est_jerk_s;
 #b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
 
         if include_commparison
