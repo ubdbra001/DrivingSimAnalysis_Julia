@@ -10,9 +10,7 @@ include_commparison = true;
 base_smoothing = 0
 smoothing = 0.01
 
-window_name = "chicane_dist_after"
 
-window_detail = all_windows[window_name]
 
 
 
@@ -21,13 +19,18 @@ plot_type = "svg"
 
 
 
+
+for (window_name, window_detail) in all_windows
+
+    println("Starting window: ", window_name, "\n")
+
     file_path = joinpath("data/windowed_data/", window_detail["output_name"])
 
-allps_windowed_df = CSV.read(file_path, DataFrame);
-# Add acceleration & jerk columns
-insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0.0)
+    allps_windowed_df = CSV.read(file_path, DataFrame);
+    # Add acceleration & jerk columns
+    insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0.0)
 
-participants = unique(allps_windowed_df.Participant_ID)
+    participants = unique(allps_windowed_df.Participant_ID)
 
     summ_path = joinpath("data/summarised_data/", "$(window_name)", "summary_$(window_name)_s$(smoothing).csv")
     plot_path = joinpath("output/plots/", "$(window_name)", "s$(smoothing)")
@@ -35,32 +38,32 @@ participants = unique(allps_windowed_df.Participant_ID)
 
     for P_id in participants
 
-padded_ID = lpad(P_id, 3, "0")
+        padded_ID = lpad(P_id, 3, "0")
 
         println("current participant: ", padded_ID, "\n")
 
         out_name = "$(window_name)_P$(padded_ID)_s$(smoothing).$(plot_type)";
         out_path = joinpath(plot_path, out_name);
-windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
+        windowed_df = allps_windowed_df[allps_windowed_df.Participant_ID .== P_id, :];
 
-x_var = windowed_df.Rel_dist_ft;
-
+        x_var = windowed_df.Rel_dist_ft;
+        
         if include_commparison
-no_smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = base_smoothing);
+            no_smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = base_smoothing);
 
-est_accel_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 1);
-est_jerk_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 2);
+            est_accel_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 1);
+            est_jerk_ns = derivative(no_smooth, windowed_df.Elapsed_time_s, nu = 2);
         end
+        
+        smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = smoothing);
 
-smooth = Spline1D(windowed_df.Elapsed_time_s, windowed_df.Longit_velocity_fps, s = smoothing);
+        est_accel_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 1);
+        est_jerk_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 2);
 
-est_accel_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 1);
-est_jerk_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 2);
-    
-# Add estimated 1st and 2nd derivatives to dataframe
+        # Add estimated 1st and 2nd derivatives to dataframe
         allps_windowed_df.Longit_accel_fps2[allps_windowed_df.Participant_ID .== P_id] .= est_accel_s;
         allps_windowed_df.Longit_jerk_fps3[allps_windowed_df.Participant_ID .== P_id] .= est_jerk_s;
-#b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
+        #b = round.(windowed_df.Elapsed_time_s[2:end] .- crossover_time; digits = 3) 
 
         if include_commparison
             p1_vars = [windowed_df.Longit_velocity_fps, no_smooth(windowed_df.Elapsed_time_s)];
@@ -74,37 +77,37 @@ est_jerk_s = derivative(smooth, windowed_df.Elapsed_time_s, nu = 2);
             alpha_vals = 1;
         end
 
-p1 = plot(
-    x_var,
+        p1 = plot(
+            x_var,
             p1_vars,
-    ylabel = "Velocity (ft/s)",
-    label = missing,
-    ylims = (0, 100),
+            ylabel = "Velocity (ft/s)",
+            label = missing,
+            ylims = (0, 100),
             la = alpha_vals
-);
+        );
 
-p2 = plot(
-    x_var,
+        p2 = plot(
+            x_var,
             p2_vars,
-    colour = "red", 
-    ylabel = "Acceleration (ft/s²)",
-    label = missing,
-    ylims = (-15, 15),
+            colour = "red", 
+            ylabel = "Acceleration (ft/s²)",
+            label = missing,
+            ylims = (-15, 15),
             la = alpha_vals
-);
+        );
 
-p3 = plot(
-    x_var,
+        p3 = plot(
+            x_var,
             p3_vars, 
-    colour = "green",
-    ylabel = "Jerk (ft/s³)",
-    label = missing,
-    ylims = (-100, 100),
+            colour = "green",
+            ylabel = "Jerk (ft/s³)",
+            label = missing,
+            ylims = (-100, 100),
             la = alpha_vals
-);
-    
-plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 600), left_margin = 20px);
-   
+        );
+
+        plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 600), left_margin = 20px);
+
         savefig(plot_out, out_path);
     end
 
@@ -115,14 +118,16 @@ plot_out = plot(p1, p2, p3, layout = (3,1), plot_title = out_name, size = (900, 
     summarised_data = combine(grouped_data,
         :Longit_velocity_fps => mean => :Mean_Velocity_fps,
         :Longit_velocity_fps => std => :SD_Velocity_fps,
-                             :Longit_accel_fps2 => mean => :Mean_Accel_fps2,
+        :Longit_accel_fps2 => mean => :Mean_Accel_fps2,
         :Longit_accel_fps2 => median => :Median_Accel_fps2,
         :Longit_accel_fps2 => std => :SD_Accel_fps2,
         :Longit_jerk_fps3 => mean => :Mean_Jerk_fps3,
         :Longit_jerk_fps3 => (x -> maximum(abs.(x))) => :MaxAbs_Jerk_fps3,
         :Longit_jerk_fps3 => std => :SD_Jerk_fps3)
-# Summarise dataframe and save original (with new cols) and summarised version
+    # Summarise dataframe and save original (with new cols) and summarised version
 
     check_and_create_dir(dirname(summ_path))
 
     CSV.write(summ_path, summarised_data)
+
+end
