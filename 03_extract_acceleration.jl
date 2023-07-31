@@ -29,6 +29,7 @@ insertcols!(allps_windowed_df, :Longit_accel_fps2 => 0.0, :Longit_jerk_fps3 => 0
 
 participants = unique(allps_windowed_df.Participant_ID)
 
+    summ_path = joinpath("data/summarised_data/", "$(window_name)", "summary_$(window_name)_s$(smoothing).csv")
     plot_path = joinpath("output/plots/", "$(window_name)", "s$(smoothing)")
     check_and_create_dir(plot_path)
 
